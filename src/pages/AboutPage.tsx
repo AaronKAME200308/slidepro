@@ -13,9 +13,8 @@ const values = [
 ]
 
 const team = [
-  { name: 'Jean-Paul K.', role: 'Fondateur & Designer Principal', bio: "Designer PowerPoint depuis 5 ans, ancien étudiant de l'École Polytechnique. Passionné par la communication visuelle.", emoji: '🎨', gradient: 'linear-gradient(135deg, #1d4ed8 0%, #4f46e5 100%)' },
-  { name: 'Aïcha M.', role: 'Directrice de Projet', bio: 'Coordinatrice de toutes les demandes. Elle veille à ce que chaque étudiant soit suivi avec attention.', emoji: '📋', gradient: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)' },
-  { name: 'Boris T.', role: 'Designer & Animateur', bio: 'Spécialiste des animations PowerPoint et des visualisations de données. Maître des transitions.', emoji: '✨', gradient: 'linear-gradient(135deg, #7c3aed 0%, #9333ea 100%)' },
+  { name: 'Jean-Pascal Olinga.', role: 'Fondateur & Designer Principal', bio: "Designer depuis 2 ans, Etudiant en Master à Pigier. Passionné par la communication visuelle.", emoji: '🎨', gradient: 'linear-gradient(135deg, #1d4ed8 0%, #4f46e5 100%)' },
+  { name: 'Aaron KAME', role: 'Co-fondateur & Développeur', bio: 'Développeur passionné par les solutions numériques. Il sassure que notre plateforme soit toujours à jour et performante.', emoji: '💻', gradient: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)' },
 ]
 
 const faqs = [
@@ -57,7 +56,7 @@ export default function AboutPage() {
           </div>
           <h1 className="font-display font-bold text-slate-900 mb-6 leading-tight" style={{ fontSize: 'clamp(2.5rem, 6vw, 4rem)' }}>
             Qui se cache derrière{' '}
-            <span style={{ background: 'linear-gradient(135deg, #6366f1 0%, #06b6d4 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>SlideZen ?</span>
+            <span style={{ background: 'linear-gradient(135deg, #6366f1 0%, #06b6d4 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>SlidePro ?</span>
           </h1>
           <p className="text-xl text-slate-500 leading-relaxed max-w-2xl mx-auto">
             Nous sommes une équipe de designers et d'anciens étudiants qui comprennent le stress de la soutenance. Notre mission : te donner une présentation qui te donne confiance.
@@ -77,7 +76,7 @@ export default function AboutPage() {
                 Donner à chaque étudiant les armes visuelles pour réussir
               </h2>
               <p className="text-slate-500 leading-relaxed mb-5">
-                Au Cameroun, de nombreux étudiants arrivent en soutenance avec des présentations PowerPoint basiques qui ne font pas honneur à des mois de travail. Nous avons créé SlideZen pour changer ça.
+                Au Cameroun, de nombreux étudiants arrivent en soutenance avec des présentations PowerPoint basiques qui ne font pas honneur à des mois de travail. Nous avons créé SlidePro pour changer ça.
               </p>
               <p className="text-slate-500 leading-relaxed mb-6">
                 Un mémoire bien présenté, c'est un jury qui est déjà conquis avant même que tu commences à parler. C'est une mention supérieure. C'est la confiance en soi pour défendre 5 ans d'études.
@@ -150,11 +149,11 @@ export default function AboutPage() {
           <div className="text-center mb-14">
             <h2 className="font-display font-bold text-slate-900 mb-4" style={{ fontSize: 'clamp(2rem, 4vw, 3rem)' }}>
               L'équipe{' '}
-              <span style={{ background: 'linear-gradient(135deg, #6366f1 0%, #06b6d4 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>SlideZen</span>
+              <span style={{ background: 'linear-gradient(135deg, #6366f1 0%, #06b6d4 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>SlidePro</span>
             </h2>
             <p className="text-slate-500 text-lg max-w-xl mx-auto">Des passionnés qui travaillent pour ton succès</p>
           </div>
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 gap-8">
             {team.map(({ name, role, bio, emoji, gradient }) => (
               <div
                 key={name}
@@ -219,7 +218,7 @@ export default function AboutPage() {
               <div className="space-y-5">
                 {[
                   { icon: Phone, label: 'Téléphone', value: '+237 6XX XXX XXX', href: 'tel:+237600000000', accent: '#4f46e5' },
-                  { icon: Mail, label: 'Email', value: 'contact@slidezen.cm', href: 'mailto:contact@slidezen.cm', accent: '#0891b2' },
+                  { icon: Mail, label: 'Email', value: 'contact@slidePro.cm', href: 'mailto:contact@slidePro.cm', accent: '#0891b2' },
                   { icon: MapPin, label: 'Localisation', value: 'Yaoundé, Cameroun (100% en ligne)', href: '#', accent: '#059669' },
                 ].map(({ icon: Icon, label, value, href, accent }) => (
                   <a key={label} href={href} className="flex items-start gap-4 group transition-all">

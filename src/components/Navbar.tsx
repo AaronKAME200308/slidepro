@@ -38,7 +38,7 @@ export default function Navbar() {
             </div>
             <div>
               <span className="font-display text-xl font-800 text-slate-900 tracking-tight">
-                Slide<span className="gradient-text">Zen</span>
+                Slide<span className="gradient-text">Pro</span>
               </span>
               <div className="text-[10px] text-slate-400 font-medium leading-none -mt-0.5 tracking-wider uppercase">
                 Studio

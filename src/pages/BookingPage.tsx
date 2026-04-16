@@ -1,4 +1,4 @@
-import { useState, type ChangeEvent, type InputHTMLAttributes } from 'react'
+import { useState, type ChangeEvent } from 'react'
 import { Link } from 'react-router-dom'
 import {
   User, Phone, Mail, GraduationCap, BookOpen, Calendar,
@@ -24,7 +24,7 @@ type BookingForm = {
 
 type BookingErrors = Partial<Record<keyof BookingForm, string>>
 
-type InputFieldProps = InputHTMLAttributes<HTMLInputElement> & {
+type InputFieldProps = React.InputHTMLAttributes<HTMLInputElement> & {
   label: string
   icon: LucideIcon
   error?: string

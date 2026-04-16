@@ -114,7 +114,7 @@ export default function ProcessPage() {
           <div className="text-center mb-16">
             <h2 className="font-display font-bold text-slate-900 mb-4" style={{ fontSize: 'clamp(2rem, 4vw, 3rem)' }}>
               Pourquoi choisir{' '}
-              <span style={{ background: 'linear-gradient(135deg, #6366f1 0%, #06b6d4 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>SlideZen ?</span>
+              <span style={{ background: 'linear-gradient(135deg, #6366f1 0%, #06b6d4 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>SlidePro ?</span>
             </h2>
             <p className="text-slate-500 text-lg max-w-xl mx-auto">Tout ce qui rend notre prestation unique et adaptée aux étudiants en soutenance</p>
           </div>

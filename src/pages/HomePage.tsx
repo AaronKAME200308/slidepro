@@ -95,12 +95,12 @@ export default function HomePage() {
         style={{ background: 'linear-gradient(160deg, #f8faff 0%, #eef2ff 40%, #f0fdf4 100%)' }}
       >
         <div
-          className="absolute top-0 right-0 rounded-full pointer-events-none"
-          style={{ width: 600, height: 600, background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', opacity: 0.12, filter: 'blur(80px)', transform: 'translate(20%, -20%)' }}
+          className="absolute top-0 right-0 w-[600px] h-[600px] rounded-full pointer-events-none"
+          style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', opacity: 0.12, filter: 'blur(80px)', transform: 'translate(20%, -20%)' }}
         />
         <div
-          className="absolute bottom-0 left-0 rounded-full pointer-events-none"
-          style={{ width: 400, height: 400, background: 'linear-gradient(135deg, #06b6d4, #3b82f6)', opacity: 0.12, filter: 'blur(60px)', transform: 'translate(-20%, 20%)' }}
+          className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full pointer-events-none"
+          style={{ background: 'linear-gradient(135deg, #06b6d4, #3b82f6)', opacity: 0.12, filter: 'blur(60px)', transform: 'translate(-20%, 20%)' }}
         />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 relative z-10">
           <div className="grid lg:grid-cols-2 gap-12 items-center">

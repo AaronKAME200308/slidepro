@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Presentation, Mail, Phone, Circle, Square, ArrowUpRight } from 'lucide-react'
+import { Presentation, Mail, Phone, ArrowUpRight } from 'lucide-react'
 
 export default function Footer() {
   return (
@@ -13,14 +13,14 @@ export default function Footer() {
                 <Presentation size={18} className="text-white" />
               </div>
               <span className="font-display text-xl font-bold text-white">
-                Slide<span className="gradient-text">Zen</span>
+                Slide<span className="gradient-text">Pro</span>
               </span>
             </div>
             <p className="text-slate-400 text-sm leading-relaxed max-w-sm mb-6">
               Nous transformons ton mémoire en une présentation PowerPoint professionnelle,
-              animée et percutante — en moins de 3 jours.
+              animée et percutante en moins de 3 jours.
             </p>
-            <div className="flex items-center gap-3">
+            {/* <div className="flex items-center gap-3">
               {[
                 { icon: Circle, label: 'Instagram' },
                 { icon: Square, label: 'LinkedIn' },
@@ -34,7 +34,7 @@ export default function Footer() {
                   <Icon size={15} className="text-slate-300" />
                 </a>
               ))}
-            </div>
+            </div> */}
           </div>
 
           {/* Navigation */}
@@ -72,15 +72,15 @@ export default function Footer() {
                 </a>
               </li>
               <li>
-                <a href="mailto:contact@slidezen.cm" className="flex items-center gap-2 text-sm hover:text-blue-400 transition-colors">
+                <a href="mailto:contact@slidePro.cm" className="flex items-center gap-2 text-sm hover:text-blue-400 transition-colors">
                   <Mail size={14} />
-                  contact@slidezen.cm
+                  contact@slidePro.cm
                 </a>
               </li>
             </ul>
 
             <div className="mt-6 p-3 rounded-lg bg-blue-600/10 border border-blue-600/20">
-              <p className="text-xs text-blue-400 font-medium">⚡ Délai garanti</p>
+              <p className="text-xs text-blue-400 font-medium">Délai garanti</p>
               <p className="text-xs text-slate-400 mt-1">Livraison en 72h maximum</p>
             </div>
           </div>
@@ -89,10 +89,10 @@ export default function Footer() {
         {/* Bottom */}
         <div className="border-t border-slate-800 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-slate-500">
-            © {new Date().getFullYear()} SlideZen Studio. Tous droits réservés.
+            © {new Date().getFullYear()} SlidePro Studio. Tous droits réservés.
           </p>
           <p className="text-xs text-slate-600">
-            Conçu avec ❤️ pour les étudiants camerounais
+            Conçu et développé par <a href="https://kame-aaron-portfolio.vercel.app" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">SlidePro Team</a>.
           </p>
         </div>
       </div>
