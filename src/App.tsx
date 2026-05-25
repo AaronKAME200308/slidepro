@@ -10,6 +10,7 @@ import ProcessPage from "./pages/ProcessPage";
 import PortfolioPage from "./pages/PortfolioPage";
 import BookingPage from "./pages/BookingPage";
 import AboutPage from "./pages/AboutPage";
+import AdminPortfolioPage from "./pages/AdminPortfoliopage";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -47,6 +48,7 @@ export default function App() {
           <Route path="/portfolio" element={<PortfolioPage />} />
           <Route path="/rendez-vous" element={<BookingPage />} />
           <Route path="/a-propos" element={<AboutPage />} />
+          <Route path="/admin/portfolio" element={<AdminPortfolioPage />} />
         </Routes>
       </main>
 

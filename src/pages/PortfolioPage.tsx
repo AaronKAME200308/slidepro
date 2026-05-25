@@ -1,9 +1,11 @@
-import { useState, useRef, type MouseEvent } from 'react'
+import { useState, useRef, type MouseEvent, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import {
   X, Zap, ArrowRight, Award, Eye, Sparkles, ChevronRight,
-  ChevronLeft, Play, Image, Info, Film
+  ChevronLeft, Play, Image, Info, Film, Loader2
 } from 'lucide-react'
+
+import {supabase} from '../services/supabase'
 
 // ─── MOCK PORTFOLIO DATA ──────────────────────────────────────────────────────
 const works = [
@@ -124,14 +126,7 @@ const works = [
   },
 ]
 
-const categories = [
-  { key: 'all',         label: 'Tous',           count: works.length },
-  { key: 'informatique',label: 'Informatique',   count: works.filter(w => w.category === 'informatique').length },
-  { key: 'management',  label: 'Management',     count: works.filter(w => w.category === 'management').length },
-  { key: 'finance',     label: 'Finance',        count: works.filter(w => w.category === 'finance').length },
-  { key: 'education',   label: 'Éducation',      count: works.filter(w => w.category === 'education').length },
-  { key: 'science',     label: 'Sciences',       count: works.filter(w => w.category === 'science').length },
-]
+const fallbackWorks = works
 
 type PortfolioWork = (typeof works)[number]
 
@@ -518,8 +513,43 @@ function WorkModal({ work, onClose }: { work: PortfolioWork | null; onClose: () 
 
 // ─── MAIN PAGE ────────────────────────────────────────────────────────────────
 export default function PortfolioPage() {
+  const [works, setWorks] = useState<PortfolioWork[]>([])
+  const [loading, setLoading] = useState(true)
   const [activeCategory, setActiveCategory] = useState('all')
   const [selectedWork, setSelectedWork] = useState<PortfolioWork | null>(null)
+
+  useEffect(() => {
+    const fetchWorks = async () => {
+      const { data } = await supabase
+        .from('portfolio_works')
+        .select('*, images:portfolio_slides(url, order)')
+        .eq('published', true)
+        .order('created_at', { ascending: false })
+      if (data && data.length > 0) {
+        const normalized = data.map((w: any) => ({
+          ...w,
+          images: (w.images || []).sort((a: any, b: any) => a.order - b.order).map((i: any) => i.url),
+          tags: Array.isArray(w.tags) ? w.tags : [],
+          highlights: Array.isArray(w.highlights) ? w.highlights : [],
+        }))
+        setWorks(normalized)
+      } else {
+        setWorks(fallbackWorks)
+      }
+      setLoading(false)
+    }
+    fetchWorks()
+  }, [])
+
+   const categories = [
+    { key: 'all', label: 'Tous', count: works.length },
+    { key: 'informatique', label: 'Informatique', count: works.filter(w => w.category === 'informatique').length },
+    { key: 'management', label: 'Management', count: works.filter(w => w.category === 'management').length },
+    { key: 'finance', label: 'Finance', count: works.filter(w => w.category === 'finance').length },
+    { key: 'education', label: 'Education', count: works.filter(w => w.category === 'education').length },
+    { key: 'science', label: 'Sciences', count: works.filter(w => w.category === 'science').length },
+  ]
+
   const filtered = activeCategory === 'all' ? works : works.filter(w => w.category === activeCategory)
 
   return (
@@ -600,11 +630,17 @@ export default function PortfolioPage() {
           <p className="text-white/35 text-sm mb-8">
             <span className="font-semibold text-white/60">{filtered.length}</span> réalisation{filtered.length > 1 ? 's' : ''}
           </p>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filtered.map(work => (
-              <TiltCard key={work.id} work={work} onClick={() => setSelectedWork(work)} />
-            ))}
-          </div>
+            {loading ? (
+            <div className="flex items-center justify-center py-24">
+              <Loader2 size={36} className="animate-spin" style={{ color: '#6366f1' }} />
+            </div>
+          ) : (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filtered.map(work => (
+                <TiltCard key={work.id} work={work} onClick={() => setSelectedWork(work)} />
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
