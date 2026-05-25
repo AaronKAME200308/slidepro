@@ -49,7 +49,7 @@ const faqs = [
 ]
 
 /* ── useInView ── */
-function useInView(ref) {
+function useInView(ref: React.RefObject<HTMLDivElement | null>) {
   const [inView, setInView] = useState(false)
   useEffect(() => {
     if (!ref.current) return
@@ -61,7 +61,7 @@ function useInView(ref) {
 }
 
 /* ── FAQ Item ── */
-function FaqItem({ q, a, idx }) {
+function FaqItem({ q, a, idx }: { q: string; a: string; idx: number }) {
   const [open, setOpen] = useState(false)
   return (
     <div
@@ -108,8 +108,18 @@ function FaqItem({ q, a, idx }) {
 }
 
 /* ── Timeline Step ── */
-function TimelineStep({ step, idx, total }) {
-  const ref = useRef(null)
+type TimelineStepType = {
+  num: string
+  icon: any
+  title: string
+  subtitle?: string
+  color: string
+  desc: string
+  details?: string[]
+}
+
+function TimelineStep({ step, idx, total }: { step: TimelineStepType; idx: number; total: number }) {
+  const ref = useRef<HTMLDivElement>(null)
   const inView = useInView(ref)
   const Icon = step.icon
 
@@ -170,7 +180,7 @@ function TimelineStep({ step, idx, total }) {
         </h3>
         <p className="text-sm text-slate-500 leading-relaxed mb-4 max-w-lg">{step.desc}</p>
         <div className="flex flex-wrap gap-2">
-          {step.details.map(d => (
+          {step.details?.map(d => (
             <div
               key={d}
               className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full"

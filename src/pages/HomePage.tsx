@@ -26,10 +26,10 @@ const testimonials = [
 ]
 
 /* ── Animated counter ── */
-function AnimatedCounter({ target, suffix }) {
-  const [count, setCount] = useState(0)
-  const ref = useRef(null)
-  const started = useRef(false)
+function AnimatedCounter({ target, suffix }: { target: number; suffix?: string | number }) {
+  const [count, setCount] = useState<number>(0)
+  const ref = useRef<HTMLSpanElement | null>(null)
+  const started = useRef<boolean>(false)
   useEffect(() => {
     const el = ref.current
     if (!el) return
@@ -38,7 +38,7 @@ function AnimatedCounter({ target, suffix }) {
         started.current = true
         const duration = 1200
         const start = performance.now()
-        const step = (now) => {
+        const step = (now: number) => {
           const t = Math.min((now - start) / duration, 1)
           const ease = 1 - Math.pow(1 - t, 3)
           setCount(Math.round(ease * target))

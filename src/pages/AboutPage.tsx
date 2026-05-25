@@ -2,7 +2,7 @@
 import {
   Zap, Target, Heart, Shield, Mail, Phone, MapPin,
   Send, Loader2, CheckCircle, Users, Lightbulb, Star,
-  BarChart3, Clock, Trophy, TrendingUp
+  BarChart3, Clock, Trophy
 } from 'lucide-react'
 import { supabase } from '../services/supabase'
 
