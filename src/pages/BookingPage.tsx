@@ -1,11 +1,12 @@
-import { useState, type ChangeEvent } from 'react'
+import { useState, useRef, useEffect, type ChangeEvent } from 'react'
 import { Link } from 'react-router-dom'
 import {
   User, Phone, Mail, GraduationCap, BookOpen, Calendar,
   Upload, CheckCircle, ArrowRight, ArrowLeft, Zap, FileText,
-  AlertCircle, Loader2, X, type LucideIcon
+  AlertCircle, Loader2, X, ChevronDown, Search, type LucideIcon
 } from 'lucide-react'
 import { supabase } from '../services/supabase'
+import {ALL_INSTITUTIONS} from '../data/data'
 
 // ─── TYPES ───────────────────────────────────────────────────────────────────
 type BookingForm = {
@@ -16,7 +17,13 @@ type BookingForm = {
 }
 type BookingErrors = Partial<Record<keyof BookingForm, string>>
 type InputFieldProps = React.InputHTMLAttributes<HTMLInputElement> & { label: string; icon: LucideIcon; error?: string }
-type SelectFieldProps = { label: string; icon: LucideIcon; options: string[]; error?: string; value: string; onChange: (e: ChangeEvent<HTMLSelectElement>) => void; name: string }
+type ComboboxFieldProps = {
+  label: string; icon: LucideIcon; options: string[]
+  error?: string; value: string
+  onChange: (value: string) => void
+  placeholder?: string
+  accentColor?: string
+}
 
 // ─── CONSTANTS ───────────────────────────────────────────────────────────────
 const LEVELS = ['Licence 1','Licence 2','Licence 3','Licence Pro','Master 1','Master 2','Doctorat','BTS','HND','Autre']
@@ -28,10 +35,10 @@ const FIELDS = [
 ]
 
 const steps = [
-  { label: 'Informations', icon: User,         color: '#4f8eff' },
-  { label: 'Cursus',       icon: GraduationCap, color: '#a78bfa' },
-  { label: 'Document',     icon: Upload,         color: '#f472b6' },
-  { label: 'Confirmation', icon: CheckCircle,    color: '#34d399' },
+  { label: 'Informations', icon: User,          color: '#4f8eff' },
+  { label: 'Cursus',       icon: GraduationCap,  color: '#a78bfa' },
+  { label: 'Document',     icon: Upload,          color: '#f472b6' },
+  { label: 'Confirmation', icon: CheckCircle,     color: '#34d399' },
 ]
 
 const initialForm: BookingForm = {
@@ -39,11 +46,205 @@ const initialForm: BookingForm = {
   thesis_title:'', defense_date:'', file:null, fileUrl:'', notes:'',
 }
 
-// ─── FIELD COMPONENTS ────────────────────────────────────────────────────────
+// ─── HIGHLIGHT MATCH ─────────────────────────────────────────────────────────
+function HighlightMatch({ text, query, color }: { text: string; query: string; color: string }) {
+  if (!query.trim()) return <span>{text}</span>
+  const idx = text.toLowerCase().indexOf(query.toLowerCase())
+  if (idx === -1) return <span>{text}</span>
+  return (
+    <span>
+      {text.slice(0, idx)}
+      <span className="font-bold" style={{ color }}>{text.slice(idx, idx + query.length)}</span>
+      {text.slice(idx + query.length)}
+    </span>
+  )
+}
+
+// ─── COMBOBOX FIELD ──────────────────────────────────────────────────────────
+function ComboboxField({ label, icon: Icon, options, error, value, onChange, placeholder = 'Tapez pour rechercher...', accentColor = '#4f8eff' }: ComboboxFieldProps) {
+  const [query, setQuery] = useState(value)
+  const [open, setOpen] = useState(false)
+  const [highlighted, setHighlighted] = useState(-1)
+  const wrapperRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const listRef = useRef<HTMLUListElement>(null)
+
+  // Sync external value → query display
+  useEffect(() => { setQuery(value) }, [value])
+
+  // Close on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+        setOpen(false)
+        // Reset query to confirmed value if user didn't pick
+        setQuery(value)
+        setHighlighted(-1)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [value])
+
+  const filtered = options.filter(o =>
+    o.toLowerCase().includes(query.toLowerCase())
+  )
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setQuery(e.target.value)
+    setOpen(true)
+    setHighlighted(-1)
+    // If field is cleared, also clear the form value
+    if (!e.target.value) onChange('')
+  }
+
+  const selectOption = (option: string) => {
+    onChange(option)
+    setQuery(option)
+    setOpen(false)
+    setHighlighted(-1)
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!open && (e.key === 'ArrowDown' || e.key === 'Enter')) {
+      setOpen(true)
+      return
+    }
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      setHighlighted(h => Math.min(h + 1, filtered.length - 1))
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      setHighlighted(h => Math.max(h - 1, 0))
+    } else if (e.key === 'Enter' && highlighted >= 0) {
+      e.preventDefault()
+      selectOption(filtered[highlighted])
+    } else if (e.key === 'Escape') {
+      setOpen(false)
+      setQuery(value)
+      setHighlighted(-1)
+    }
+  }
+
+  // Scroll highlighted item into view
+  useEffect(() => {
+    if (highlighted >= 0 && listRef.current) {
+      const item = listRef.current.children[highlighted] as HTMLElement
+      item?.scrollIntoView({ block: 'nearest' })
+    }
+  }, [highlighted])
+
+  const isConfirmed = value && query === value
+
+  return (
+    <div ref={wrapperRef} className="relative">
+      <label className="block text-sm font-semibold text-slate-700 mb-1.5">{label}</label>
+
+      {/* Input */}
+      <div className="relative">
+        <div className="absolute left-3.5 top-1/2 -translate-y-1/2 z-10 transition-colors duration-200"
+          style={{ color: open ? accentColor : '#94a3b8' }}>
+          {open ? <Search size={16} /> : <Icon size={16} />}
+        </div>
+        <input
+          ref={inputRef}
+          type="text"
+          value={query}
+          onChange={handleInputChange}
+          onFocus={() => { setOpen(true) }}
+          onKeyDown={handleKeyDown}
+          placeholder={placeholder}
+          autoComplete="off"
+          className="w-full pl-10 pr-10 py-3 rounded-xl text-sm outline-none transition-all duration-200"
+          style={{
+            background: '#fff',
+            border: `1.5px solid ${error ? '#f87171' : open ? accentColor : '#e2e8f0'}`,
+            boxShadow: open ? `0 0 0 3px ${accentColor}18` : 'none',
+          }}
+        />
+        {/* Right icon: clear or chevron */}
+        <div className="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center gap-1">
+          {query && (
+            <button
+              type="button"
+              onClick={() => { onChange(''); setQuery(''); setOpen(true); inputRef.current?.focus() }}
+              className="w-4 h-4 rounded-full flex items-center justify-center transition-colors"
+              style={{ color: '#94a3b8' }}
+              onMouseEnter={e => e.currentTarget.style.color = '#ef4444'}
+              onMouseLeave={e => e.currentTarget.style.color = '#94a3b8'}
+            >
+              <X size={12} />
+            </button>
+          )}
+          <ChevronDown
+            size={15}
+            className="transition-transform duration-200"
+            style={{ color: open ? accentColor : '#94a3b8', transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }}
+          />
+        </div>
+
+        {/* Confirmed badge */}
+        {isConfirmed && !open && (
+          <div className="absolute right-8 top-1/2 -translate-y-1/2">
+            <CheckCircle size={14} style={{ color: '#34d399' }} />
+          </div>
+        )}
+      </div>
+
+      {/* Dropdown */}
+      {open && (
+        <ul
+          ref={listRef}
+          className="absolute left-0 right-0 z-50 mt-1.5 rounded-2xl overflow-hidden overflow-y-auto"
+          style={{
+            background: '#fff',
+            border: `1.5px solid ${accentColor}30`,
+            boxShadow: `0 8px 32px rgba(0,0,0,0.12), 0 0 0 1px ${accentColor}10`,
+            maxHeight: 220,
+            animation: 'dropdownIn 0.15s ease',
+          }}
+        >
+          <style>{`@keyframes dropdownIn { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }`}</style>
+
+          {filtered.length === 0 ? (
+            <li className="px-4 py-3 text-sm text-slate-400 flex items-center gap-2">
+              <Search size={13} /> Aucun résultat pour « {query} »
+            </li>
+          ) : (
+            filtered.map((option, i) => (
+              <li
+                key={option}
+                onMouseDown={() => selectOption(option)}
+                onMouseEnter={() => setHighlighted(i)}
+                className="px-4 py-2.5 text-sm cursor-pointer flex items-center justify-between transition-colors duration-100"
+                style={{
+                  background: i === highlighted ? `${accentColor}10` : value === option ? `${accentColor}06` : 'transparent',
+                  color: value === option ? accentColor : '#0f172a',
+                  borderLeft: value === option ? `3px solid ${accentColor}` : '3px solid transparent',
+                }}
+              >
+                <HighlightMatch text={option} query={query} color={accentColor} />
+                {value === option && <CheckCircle size={13} style={{ color: accentColor, flexShrink: 0 }} />}
+              </li>
+            ))
+          )}
+        </ul>
+      )}
+
+      {error && (
+        <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+          <AlertCircle size={11} />{error}
+        </p>
+      )}
+    </div>
+  )
+}
+
+// ─── INPUT FIELD ─────────────────────────────────────────────────────────────
 function InputField({ label, icon: Icon, error, ...props }: InputFieldProps) {
   return (
     <div>
-      <label className="block text-sm font-semibold text-white/80 mb-1.5">{label}</label>
+      <label className="block text-sm font-semibold text-slate-700 mb-1.5">{label}</label>
       <div className="relative">
         <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 z-10">
           <Icon size={16} />
@@ -52,27 +253,6 @@ function InputField({ label, icon: Icon, error, ...props }: InputFieldProps) {
           className={`input-field w-full pl-10 pr-4 py-3 rounded-xl text-sm bg-white ${error ? 'border-red-400' : ''}`}
           {...props}
         />
-      </div>
-      {error && <p className="text-red-500 text-xs mt-1 flex items-center gap-1"><AlertCircle size={11} />{error}</p>}
-    </div>
-  )
-}
-
-function SelectField({ label, icon: Icon, options, error, value, onChange, name }: SelectFieldProps) {
-  return (
-    <div>
-      <label className="block text-sm font-semibold text-slate-700 mb-1.5">{label}</label>
-      <div className="relative">
-        <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 z-10">
-          <Icon size={16} />
-        </div>
-        <select
-          name={name} value={value} onChange={onChange}
-          className={`input-field w-full pl-10 pr-4 py-3 rounded-xl text-sm bg-white appearance-none ${error ? 'border-red-400' : ''}`}
-        >
-          <option value="">Sélectionner...</option>
-          {options.map(o => <option key={o} value={o}>{o}</option>)}
-        </select>
       </div>
       {error && <p className="text-red-500 text-xs mt-1 flex items-center gap-1"><AlertCircle size={11} />{error}</p>}
     </div>
@@ -290,9 +470,36 @@ export default function BookingPage() {
                 <h2 className="text-2xl font-bold text-white">Ton cursus académique</h2>
                 <p className="text-white/40 text-sm mt-1">Ces informations nous aident à personnaliser ta présentation.</p>
               </div>
-              <InputField label="Nom de l'université *" icon={GraduationCap} name="university" value={form.university} onChange={handleChange} placeholder="Ex : Université de Yaoundé I" error={errors.university} />
-              <SelectField label="Filière / Spécialité *" icon={BookOpen} name="field" value={form.field} onChange={handleChange} options={FIELDS} error={errors.field} />
-              <SelectField label="Niveau d'études *" icon={GraduationCap} name="level" value={form.level} onChange={handleChange} options={LEVELS} error={errors.level} />
+              <ComboboxField
+                label="Nom de l'université *"
+                icon={GraduationCap}
+                options={ALL_INSTITUTIONS}
+                value={form.university}
+                onChange={v => { setForm(f => ({ ...f, university: v })); if (errors.university) setErrors(er => ({ ...er, university: '' })) }}
+                placeholder="Ex : Université de Yaoundé I"
+                accentColor={currentColor}
+                error={errors.university}
+              />
+              <ComboboxField
+                label="Filière / Spécialité *"
+                icon={BookOpen}
+                options={FIELDS}
+                value={form.field}
+                onChange={v => { setForm(f => ({ ...f, field: v })); if (errors.field) setErrors(er => ({ ...er, field: '' })) }}
+                placeholder="Ex : Informatique, Gestion..."
+                accentColor={currentColor}
+                error={errors.field}
+              />
+              <ComboboxField
+                label="Niveau d'études *"
+                icon={GraduationCap}
+                options={LEVELS}
+                value={form.level}
+                onChange={v => { setForm(f => ({ ...f, level: v })); if (errors.level) setErrors(er => ({ ...er, level: '' })) }}
+                placeholder="Ex : Master 2, Licence 3..."
+                accentColor={currentColor}
+                error={errors.level}
+              />
               <InputField label="Titre de ton mémoire / thèse *" icon={FileText} name="thesis_title" value={form.thesis_title} onChange={handleChange} placeholder="Titre exact de ton travail de recherche" error={errors.thesis_title} />
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1.5">Date de soutenance *</label>
@@ -349,7 +556,7 @@ export default function BookingPage() {
                     ) : (
                       <div className="text-center">
                         <p className="font-semibold text-white/70 text-sm">Clique pour sélectionner ton rapport</p>
-                        <p className="text-white text-xs mt-1">PDF uniquement — Max 50 Mo</p>
+                        <p className="text-white/35 text-xs mt-1">PDF uniquement — Max 50 Mo</p>
                       </div>
                     )}
                     <input type="file" accept=".pdf" className="hidden" onChange={handleFileChange} />
@@ -379,7 +586,7 @@ export default function BookingPage() {
                   <p className="text-xs font-medium" style={{ color: '#34d399' }}>Sauvegardé de manière sécurisée</p>
                   <button
                     onClick={() => { setUploadDone(false); setForm(f => ({ ...f, file: null, fileUrl: '' })) }}
-                    className="mt-4 text-white text-xs hover:text-red-400 transition-colors flex items-center gap-1 mx-auto"
+                    className="mt-4 text-white/30 text-xs hover:text-red-400 transition-colors flex items-center gap-1 mx-auto"
                   >
                     <X size={12} /> Changer de fichier
                   </button>
@@ -414,7 +621,7 @@ export default function BookingPage() {
                   { title: 'Cursus', rows: [['Établissement', form.university], ['Filière', form.field], ['Niveau', form.level], ['Soutenance', form.defense_date]] },
                 ].map(({ title, rows }) => (
                   <div key={title} className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                    <div className="text-[10px] font-bold tracking-[2px] uppercase text-white mb-3" style={{ fontFamily: 'monospace' }}>{title}</div>
+                    <div className="text-[10px] font-bold tracking-[2px] uppercase text-white/35 mb-3" style={{ fontFamily: 'monospace' }}>{title}</div>
                     {rows.map(([k, v]) => (
                       <div key={k} className="flex justify-between py-1.5 border-b last:border-0" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
                         <span className="text-xs text-white/40">{k}</span>
@@ -425,7 +632,7 @@ export default function BookingPage() {
                 ))}
 
                 <div className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                  <div className="text-[10px] font-bold tracking-[2px] uppercase text-white mb-2" style={{ fontFamily: 'monospace' }}>Titre du mémoire</div>
+                  <div className="text-[10px] font-bold tracking-[2px] uppercase text-white/35 mb-2" style={{ fontFamily: 'monospace' }}>Titre du mémoire</div>
                   <p className="text-sm font-medium text-white/80">{form.thesis_title}</p>
                 </div>
 
@@ -446,7 +653,7 @@ export default function BookingPage() {
               >
                 {submitting ? <><Loader2 size={18} className="animate-spin" /> Envoi en cours...</> : <><CheckCircle size={18} /> Confirmer ma demande</>}
               </button>
-              <p className="text-center text-white text-xs mt-3">Aucun paiement requis maintenant — on te contacte d'abord</p>
+              <p className="text-center text-white/30 text-xs mt-3">Aucun paiement requis maintenant — on te contacte d'abord</p>
             </div>
           )}
 
@@ -479,7 +686,7 @@ export default function BookingPage() {
           )}
         </div>
 
-        <div className="mt-5 text-center text-white text-xs">
+        <div className="mt-5 text-center text-white/30 text-xs">
           Des questions ?{' '}
           <a href="tel:+237600000000" className="hover:text-white/60 transition-colors" style={{ color: '#4f8eff' }}>
             Appelle-nous directement
