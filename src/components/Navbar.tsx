@@ -24,12 +24,12 @@ export default function Navbar() {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled ? 'nav-blur shadow-sm' : 'bg-transparent'
-      }`}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'nav-blur shadow-sm' : 'bg-transparent'
+        }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 lg:h-20">
+
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2.5 group">
             <div className="relative w-9 h-9 rounded-xl btn-primary flex items-center justify-center">
@@ -37,10 +37,16 @@ export default function Navbar() {
               <span className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full border-2 border-white" />
             </div>
             <div>
-              <span className="font-display text-xl font-800 text-slate-900 tracking-tight">
+              <span
+                className="font-display text-xl font-800 tracking-tight transition-colors duration-300"
+                style={{ color: scrolled ? '#0f172a' : '#fff' }}
+              >
                 Slide<span className="gradient-text">Pro</span>
               </span>
-              <div className="text-[10px] text-slate-400 font-medium leading-none -mt-0.5 tracking-wider uppercase">
+              <div
+                className="text-[10px] font-medium leading-none -mt-0.5 tracking-wider uppercase transition-colors duration-300"
+                style={{ color: scrolled ? '#94a3b8' : 'rgba(255,255,255,0.4)' }}
+              >
                 Studio
               </div>
             </div>
@@ -54,11 +60,28 @@ export default function Navbar() {
                 <Link
                   key={link.to}
                   to={link.to}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                    active
-                      ? 'bg-blue-50 text-blue-600'
-                      : 'text-slate-600 hover:text-blue-600 hover:bg-blue-50/60'
-                  }`}
+                  className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
+                  style={active
+                    ? {
+                      background: scrolled ? 'rgba(37,99,235,0.08)' : 'rgba(255,255,255,0.1)',
+                      color: scrolled ? '#2563eb' : '#fff',
+                    }
+                    : {
+                      color: scrolled ? '#475569' : 'rgba(255,255,255,0.7)',
+                    }
+                  }
+                  onMouseEnter={e => {
+                    if (!active) {
+                      e.currentTarget.style.background = scrolled ? 'rgba(37,99,235,0.06)' : 'rgba(255,255,255,0.08)'
+                      e.currentTarget.style.color = scrolled ? '#2563eb' : '#fff'
+                    }
+                  }}
+                  onMouseLeave={e => {
+                    if (!active) {
+                      e.currentTarget.style.background = 'transparent'
+                      e.currentTarget.style.color = scrolled ? '#475569' : 'rgba(255,255,255,0.7)'
+                    }
+                  }}
                 >
                   {link.label}
                 </Link>
@@ -79,7 +102,8 @@ export default function Navbar() {
 
           {/* Mobile Menu Toggle */}
           <button
-            className="lg:hidden p-2 rounded-lg text-slate-600 hover:bg-slate-100"
+            className="lg:hidden p-2 rounded-lg transition-colors duration-200"
+            style={{ color: scrolled ? 'rgba(255,255,255,0.8)' : '#475569' }}
             onClick={() => setOpen(!open)}
           >
             {open ? <X size={22} /> : <Menu size={22} />}
@@ -89,7 +113,15 @@ export default function Navbar() {
 
       {/* Mobile Dropdown */}
       {open && (
-        <div className="lg:hidden nav-blur border-t border-slate-100 animate-fade-in">
+        <div
+          className="lg:hidden border-t animate-fade-in"
+          style={{
+            background: 'rgba(6,9,24,0.96)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            borderColor: 'rgba(255,255,255,0.08)',
+          }}
+        >
           <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col gap-1">
             {navLinks.map((link) => {
               const active = location.pathname === link.to
@@ -97,9 +129,11 @@ export default function Navbar() {
                 <Link
                   key={link.to}
                   to={link.to}
-                  className={`px-4 py-3 rounded-lg text-sm font-medium transition-all ${
-                    active ? 'bg-blue-50 text-blue-600' : 'text-slate-700 hover:bg-slate-50'
-                  }`}
+                  className="px-4 py-3 rounded-lg text-sm font-medium transition-all"
+                  style={{
+                    background: active ? 'rgba(255,255,255,0.08)' : 'transparent',
+                    color: active ? '#fff' : 'rgba(255,255,255,0.65)',
+                  }}
                 >
                   {link.label}
                 </Link>

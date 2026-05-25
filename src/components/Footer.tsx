@@ -66,9 +66,9 @@ export default function Footer() {
             <h4 className="text-white font-semibold mb-5 text-sm uppercase tracking-widest">Contact</h4>
             <ul className="space-y-3">
               <li>
-                <a href="tel:+237600000000" className="flex items-center gap-2 text-sm hover:text-blue-400 transition-colors">
+                <a href="tel:+237673846813" className="flex items-center gap-2 text-sm hover:text-blue-400 transition-colors">
                   <Phone size={14} />
-                  +237 6XX XXX XXX
+                  +237 6 73 84 68 13
                 </a>
               </li>
               <li>
@@ -81,7 +81,7 @@ export default function Footer() {
 
             <div className="mt-6 p-3 rounded-lg bg-blue-600/10 border border-blue-600/20">
               <p className="text-xs text-blue-400 font-medium">Délai garanti</p>
-              <p className="text-xs text-slate-400 mt-1">Livraison en 72h maximum</p>
+              <p className="text-xs text-slate-400 mt-1">Livraison en 05 jours maximum</p>
             </div>
           </div>
         </div>

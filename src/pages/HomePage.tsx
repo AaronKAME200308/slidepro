@@ -1,391 +1,338 @@
 ﻿import { Link } from 'react-router-dom'
+import { useEffect, useRef, useState } from 'react'
 import {
   Zap, Clock, Award, ChevronRight, Star, ArrowRight,
-  FileText, Wand2, Presentation, CheckCircle, Users, TrendingUp
+  CheckCircle, Users, TrendingUp, BarChart3
 } from 'lucide-react'
 
 const stats = [
-  { value: '72h', label: 'Délai maximum', icon: Clock },
-  { value: '50+', label: 'Projets livrés', icon: Award },
-  { value: '98%', label: 'Clients satisfaits', icon: Star },
-  { value: '100%', label: 'Taux de réussite', icon: TrendingUp },
+  { value: 5,   suffix: 'j', label: 'Délai maximum',    icon: Clock },
+  { value: 50,  suffix: '+', label: 'Projets livrés',   icon: Award },
+  { value: 98,  suffix: '%', label: 'Clients satisfaits', icon: Star },
+  { value: 100, suffix: '%', label: 'Taux de réussite', icon: TrendingUp },
 ]
 
 const processSteps = [
-  {
-    step: '01',
-    title: 'Tu souscris & uploades ton rapport',
-    desc: 'Remplis le formulaire en ligne et envoie ton document PDF directement via la plateforme.',
-    icon: FileText,
-    gradient: 'linear-gradient(135deg, #1d4ed8 0%, #0891b2 100%)',
-    accent: '#1d4ed8',
-  },
-  {
-    step: '02',
-    title: 'Nous créons ta présentation',
-    desc: 'Notre équipe conçoit un PowerPoint pro avec animations modernes et mise en page soignée.',
-    icon: Wand2,
-    gradient: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
-    accent: '#4f46e5',
-  },
-  {
-    step: '03',
-    title: 'Tu reçois ton PPT en 72h',
-    desc: 'Tu reçois ta présentation finale prête à présenter devant ton jury de soutenance.',
-    icon: Presentation,
-    gradient: 'linear-gradient(135deg, #059669 0%, #0d9488 100%)',
-    accent: '#059669',
-  },
-]
-
-const recentWorks = [
-  {
-    title: "Analyse du système d'information bancaire",
-    field: 'Informatique',
-    level: 'Master 2',
-    gradient: 'linear-gradient(135deg, #1d4ed8 0%, #4f46e5 100%)',
-    accent: '#4f46e5',
-    icon: '💻',
-  },
-  {
-    title: 'Impact du microcrédit sur les PME',
-    field: 'Finance',
-    level: 'Licence 3',
-    gradient: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
-    accent: '#7c3aed',
-    icon: '📊',
-  },
-  {
-    title: 'Approche agile en gestion de projet',
-    field: 'Management',
-    level: 'Master 1',
-    gradient: 'linear-gradient(135deg, #0284c7 0%, #2563eb 100%)',
-    accent: '#2563eb',
-    icon: '🎯',
-  },
+  { step: '01', title: 'Tu souscris & uploades ton rapport',  desc: 'Remplis le formulaire en ligne et envoie ton document PDF directement via la plateforme.',         dotClass: 'from-blue-700 to-cyan-500' },
+  { step: '02', title: 'Nous créons ta présentation',         desc: 'Notre équipe conçoit un PowerPoint pro avec animations modernes et mise en page soignée.',           dotClass: 'from-indigo-600 to-violet-600' },
+  { step: '03', title: 'Tu reçois ton PPT en 5 jours',        desc: 'Tu reçois ta présentation finale prête à présenter devant ton jury de soutenance.',                  dotClass: 'from-emerald-600 to-teal-500' },
 ]
 
 const testimonials = [
-  {
-    name: 'Marie-Claire N.',
-    univ: 'Université de Yaoundé I',
-    text: 'Ma présentation était vraiment professionnelle. Le jury était impressionné !',
-    rating: 5,
-  },
-  {
-    name: 'Patrick A.',
-    univ: 'Institut Supérieur de Management',
-    text: 'Livré en 2 jours seulement, avec des animations super modernes. Je recommande à 100%.',
-    rating: 5,
-  },
-  {
-    name: 'Sandrine M.',
-    univ: 'ESSEC Douala',
-    text: "Rapport qualité-rapidité imbattable. J'ai eu mention très honorable à ma soutenance.",
-    rating: 5,
-  },
+  { name: 'Marie-Claire N.', univ: 'Université de Yaoundé I',         text: 'Ma présentation était vraiment professionnelle. Le jury était impressionné !',                        rating: 5 },
+  { name: 'Patrick A.',      univ: 'Institut Supérieur de Management', text: 'Livré en 4 jours seulement, avec des animations super modernes. Je recommande à 100%.',             rating: 5 },
+  { name: 'Sandrine M.',     univ: 'ESSEC Douala',                     text: "Rapport qualité-rapidité imbattable. J'ai eu mention très honorable à ma soutenance.",              rating: 5 },
+  { name: 'Jean-Paul K.',    univ: 'FSEG Yaoundé II',                  text: 'Présentation livrée avant le délai, impeccable. Mon directeur était étonné du rendu.',              rating: 5 },
 ]
 
+/* ── Animated counter ── */
+function AnimatedCounter({ target, suffix }) {
+  const [count, setCount] = useState(0)
+  const ref = useRef(null)
+  const started = useRef(false)
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const obs = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting && !started.current) {
+        started.current = true
+        const duration = 1200
+        const start = performance.now()
+        const step = (now) => {
+          const t = Math.min((now - start) / duration, 1)
+          const ease = 1 - Math.pow(1 - t, 3)
+          setCount(Math.round(ease * target))
+          if (t < 1) requestAnimationFrame(step)
+        }
+        requestAnimationFrame(step)
+      }
+    }, { threshold: 0.5 })
+    obs.observe(el)
+    return () => obs.disconnect()
+  }, [target])
+  return <span ref={ref}>{count}{suffix}</span>
+}
+
+/* ── Testimonial carousel ── */
+function TestimonialCarousel() {
+  const doubled = [...testimonials, ...testimonials]
+  const [paused, setPaused] = useState(false)
+  return (
+    <div className="overflow-hidden w-full">
+      <div
+        className="flex gap-3.5 px-7 py-1 w-max"
+        style={{ animation: paused ? 'none' : 'slideCarousel 24s linear infinite' }}
+        onMouseEnter={() => setPaused(true)}
+        onMouseLeave={() => setPaused(false)}
+      >
+        {doubled.map((t, i) => (
+          <div key={i} className="w-64 shrink-0 rounded-2xl p-4 glass-card-dark hover:bg-white/10 transition-colors duration-200">
+            <div className="flex gap-0.5 mb-2.5">
+              {Array.from({ length: t.rating }).map((_, j) => (
+                <Star key={j} size={11} className="text-yellow-400 fill-yellow-400" />
+              ))}
+            </div>
+            <p className="text-xs text-white/70 leading-relaxed mb-3 italic">"{t.text}"</p>
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full shrink-0 bg-gradient-to-br from-indigo-500 to-cyan-500 flex items-center justify-center text-xs font-medium text-white">
+                {t.name.charAt(0)}
+              </div>
+              <div>
+                <div className="text-xs font-medium text-white/90">{t.name}</div>
+                <div className="text-[10px] text-white/40">{t.univ}</div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+/* ── PPT Mockup ── */
+function PptMockup() {
+  return (
+    <div className="relative hidden lg:block">
+      {/* Badge top-right */}
+      <div className="animate-float-delayed absolute -top-3 right-0 z-10 glass-card-dark rounded-2xl px-3.5 py-2 flex items-center gap-2">
+        <div className="w-8 h-8 rounded-full bg-yellow-400/20 border border-yellow-400/35 flex items-center justify-center text-yellow-400 text-sm">★</div>
+        <div>
+          <div className="text-xs font-semibold text-white/90">4.9 / 5</div>
+          <div className="text-[10px] text-white/45">50+ avis</div>
+        </div>
+      </div>
+
+      {/* Card */}
+      <div className="animate-float my-6">
+        <div className="rounded-2xl overflow-hidden border border-white/15" style={{ boxShadow: '0 24px 72px rgba(0,0,0,0.55)' }}>
+          {/* Titlebar */}
+          <div className="bg-black/40 px-4 py-2.5 flex items-center gap-1.5 border-b border-white/10">
+            {['#ff5f57','#ffbd2e','#28c840'].map(c => (
+              <div key={c} className="w-2.5 h-2.5 rounded-full" style={{ background: c }} />
+            ))}
+            <span className="text-[10px] text-white/30 ml-2">Soutenance_Master2_Finale.pptx</span>
+          </div>
+          {/* Slide */}
+          <div className="relative overflow-hidden h-60 flex flex-col justify-between p-6 pb-5"
+            style={{ background: 'linear-gradient(135deg, #1d4ed8 0%, #4f46e5 50%, #0891b2 100%)' }}>
+            {/* Decorative rings */}
+            <div className="absolute -top-8 -right-8 w-36 h-36 rounded-full border border-white/10"
+              style={{ animation: 'spinSlow 14s linear infinite' }} />
+            <div className="absolute bottom-5 -left-4 w-24 h-24 rounded-full border border-white/7" />
+            {/* Content */}
+            <div className="relative z-10">
+              <div className="text-white/50 text-[9px] font-semibold tracking-widest uppercase mb-1.5">
+                Université de Yaoundé I · Master 2
+              </div>
+              <div className="text-white text-lg font-bold leading-snug">
+                Impact du e-commerce<br />sur le commerce traditionnel
+              </div>
+            </div>
+            {/* Chart bars */}
+            <div className="relative z-10">
+              <div className="flex items-end gap-1.5 h-14">
+                {[55,85,42,90,68,50].map((h, i) => (
+                  <div key={i} className="flex-1 rounded-t"
+                    style={{ height: `${h}%`, background: (i===1||i===3) ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.25)' }} />
+                ))}
+              </div>
+              <div className="flex justify-between items-center mt-3">
+                <div className="flex gap-1">
+                  {[1,2,3,4,5].map(i => (
+                    <div key={i} className="h-0.5 rounded" style={{ width: i===1 ? 22 : 14, background: i===1 ? '#fff' : 'rgba(255,255,255,0.25)' }} />
+                  ))}
+                </div>
+                <div className="text-[9px] text-white/40">Slide 1 / 18</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Badge bottom-left */}
+      <div className="animate-float absolute -bottom-2 left-0 z-10 glass-card-dark rounded-2xl px-3.5 py-2 flex items-center gap-2">
+        <div className="w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 text-sm">✓</div>
+        <div>
+          <div className="text-xs font-semibold text-white/90">Livré en 4 jours</div>
+          <div className="text-[10px] text-white/45">Mention très honorable</div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ── Main ── */
 export default function HomePage() {
   return (
-    <div className="font-body">
-      {/* HERO */}
-      <section
-        className="relative min-h-screen flex items-center overflow-hidden pt-20"
-        style={{ background: 'linear-gradient(160deg, #f8faff 0%, #eef2ff 40%, #f0fdf4 100%)' }}
-      >
-        <div
-          className="absolute top-0 right-0 w-[600px] h-[600px] rounded-full pointer-events-none"
-          style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', opacity: 0.12, filter: 'blur(80px)', transform: 'translate(20%, -20%)' }}
-        />
-        <div
-          className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full pointer-events-none"
-          style={{ background: 'linear-gradient(135deg, #06b6d4, #3b82f6)', opacity: 0.12, filter: 'blur(60px)', transform: 'translate(-20%, 20%)' }}
-        />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 relative z-10">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+    <div>
+      <style>{`
+        @keyframes pulseOrb    { 0%,100%{opacity:0.3;transform:scale(1)}   50%{opacity:0.18;transform:scale(1.08)} }
+        @keyframes slideCarousel { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+        @keyframes spinSlow    { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+        .hero-orb-1 { animation: pulseOrb 6s ease-in-out infinite; }
+        .hero-orb-2 { animation: pulseOrb 8s ease-in-out infinite 2s; }
+      `}</style>
+
+      {/* ── HERO ── */}
+      <section className="relative overflow-hidden min-h-screen flex items-center pt-20"
+        style={{ background: 'linear-gradient(140deg, #0f0825 0%, #1a1060 30%, #0d2e5c 65%, #061a35 100%)' }}>
+
+        <div className="hero-orb-1 absolute w-[500px] h-[500px] rounded-full pointer-events-none opacity-30"
+          style={{ background: 'radial-gradient(circle, #7c3aed 0%, transparent 70%)', top: -120, right: -100 }} />
+        <div className="hero-orb-2 absolute w-[380px] h-[380px] rounded-full pointer-events-none opacity-[0.28]"
+          style={{ background: 'radial-gradient(circle, #0891b2 0%, transparent 70%)', bottom: -80, left: -80 }} />
+
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-8 py-12 animate-slide-up">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+
+            {/* Left */}
             <div>
-              <div
-                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold mb-6"
-                style={{ background: 'rgba(99,102,241,0.1)', color: '#6366f1', border: '1px solid rgba(99,102,241,0.2)' }}
-              >
-                <Zap size={13} />
-                Délai garanti : 72 heures maximum
+              <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium glass-card-dark text-white/90 mb-6">
+                <Zap size={12} /> Délai garanti : 5 jours maximum
               </div>
-              <h1 className="font-display font-bold text-slate-900 leading-[1.05] mb-6" style={{ fontSize: 'clamp(2.8rem, 6vw, 4.5rem)' }}>
-                Ton mémoire,{' '}<br />
-                <span style={{ background: 'linear-gradient(135deg, #6366f1 0%, #06b6d4 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-                  transformé en
-                </span>
+
+              <h1 className="text-[clamp(2.6rem,5.5vw,4.2rem)] font-bold text-white leading-[1.05] mb-5">
+                Ton mémoire,{' '}
+                <span className="gradient-text-white">transformé en</span>
                 <br />présentation parfaite
               </h1>
-              <p className="text-lg text-slate-600 leading-relaxed mb-8 max-w-lg">
+
+              <p className="text-base text-white/60 leading-relaxed mb-7 max-w-[440px]">
                 Nous créons des PowerPoints professionnels, animés et percutants à partir de ton rapport de soutenance. Impressionne ton jury dès la première slide.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Link
-                  to="/rendez-vous"
-                  className="inline-flex items-center justify-center gap-2 px-7 py-4 rounded-2xl text-white font-bold text-base transition-all"
-                  style={{ background: 'linear-gradient(135deg, #4f46e5 0%, #0891b2 100%)', boxShadow: '0 8px 32px rgba(99,102,241,0.35)' }}
-                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 16px 48px rgba(99,102,241,0.45)' }}
-                  onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(99,102,241,0.35)' }}
-                >
-                  <Zap size={16} />Commencer maintenant
+
+              <div className="flex flex-wrap gap-3 mb-7">
+                <Link to="/rendez-vous" className="btn-primary inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-white text-sm font-semibold">
+                  <Zap size={16} /> Commencer maintenant
                 </Link>
-                <Link
-                  to="/processus"
-                  className="inline-flex items-center justify-center gap-2 px-7 py-4 rounded-2xl font-semibold text-base transition-all"
-                  style={{ background: 'rgba(255,255,255,0.8)', color: '#475569', border: '1.5px solid rgba(99,102,241,0.2)', backdropFilter: 'blur(8px)' }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(99,102,241,0.5)'; e.currentTarget.style.color = '#4f46e5' }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(99,102,241,0.2)'; e.currentTarget.style.color = '#475569' }}
+                <Link to="/processus"
+                  className="inline-flex items-center gap-2 px-5 py-3.5 rounded-xl text-sm font-medium glass-card-dark text-white/85 hover:bg-white/15 transition-colors"
                 >
-                  Voir comment ça marche<ChevronRight size={16} />
+                  Voir comment ça marche <ChevronRight size={16} />
                 </Link>
               </div>
-              <div className="flex flex-wrap items-center gap-5 mt-10">
-                {['Rendu en 72h', 'Animations professionnelles', 'Support inclus'].map(badge => (
-                  <div key={badge} className="flex items-center gap-1.5 text-slate-500 text-sm">
-                    <CheckCircle size={14} className="text-emerald-500" />{badge}
+
+              <div className="flex flex-wrap gap-5">
+                {['Rendu en 5 jours', 'Animations pro', 'Support inclus'].map(b => (
+                  <div key={b} className="flex items-center gap-1.5 text-sm text-white/50">
+                    <CheckCircle size={13} className="text-emerald-400" />{b}
                   </div>
                 ))}
               </div>
             </div>
-            <div className="relative hidden lg:block">
-              <style>{`@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}@keyframes floatD{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}`}</style>
-              <div className="relative" style={{ animation: 'float 4s ease-in-out infinite' }}>
-                <div className="rounded-3xl p-1.5" style={{ background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.95)', boxShadow: '0 32px 80px rgba(99,102,241,0.2), 0 8px 32px rgba(0,0,0,0.06)' }}>
-                  <div className="rounded-[20px] overflow-hidden aspect-video flex flex-col justify-between p-8 relative" style={{ background: 'linear-gradient(135deg, #1d4ed8 0%, #4f46e5 50%, #0891b2 100%)' }}>
-                    <div className="absolute inset-0 overflow-hidden">
-                      <div className="absolute top-4 right-4 w-32 h-32 rounded-full border border-white/10" />
-                      <div className="absolute bottom-8 left-4 w-20 h-20 rounded-full border border-white/10" />
-                    </div>
-                    <div className="relative z-10">
-                      <div className="text-blue-200 text-xs font-semibold uppercase tracking-widest mb-2">Université de Yaoundé I</div>
-                      <h3 className="text-white font-bold text-xl leading-tight">Impact du e-commerce<br />sur le commerce traditionnel</h3>
-                    </div>
-                    <div className="relative z-10 flex items-end gap-2 h-16">
-                      {[60, 85, 45, 90, 70].map((h, i) => (
-                        <div key={i} className="flex-1 rounded-t" style={{ height: `${h}%`, background: 'rgba(255,255,255,0.3)' }} />
-                      ))}
-                    </div>
-                    <div className="relative z-10 flex items-center justify-between mt-4">
-                      <div className="flex gap-1.5">
-                        {[1,2,3,4,5].map(i => <div key={i} className="w-6 h-1 rounded-full" style={{ background: i===1?'#fff':'rgba(255,255,255,0.3)' }} />)}
-                      </div>
-                      <div className="text-blue-200 text-xs">Slide 1 / 18</div>
-                    </div>
-                  </div>
-                </div>
-                <div className="absolute -bottom-4 -left-6 rounded-2xl px-4 py-3" style={{ background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.9)', boxShadow: '0 8px 32px rgba(0,0,0,0.1)', animation: 'floatD 3.5s ease-in-out infinite' }}>
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: '#dcfce7' }}>
-                      <CheckCircle size={16} className="text-emerald-600" />
-                    </div>
-                    <div>
-                      <div className="text-xs font-bold text-slate-800">Livré en 2 jours</div>
-                      <div className="text-xs text-slate-400">Mention très honorable</div>
-                    </div>
-                  </div>
-                </div>
-                <div className="absolute -top-4 -right-4 rounded-2xl px-4 py-2.5" style={{ background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.9)', boxShadow: '0 8px 32px rgba(0,0,0,0.1)', animation: 'float 3.5s ease-in-out infinite', animationDelay: '1.5s' }}>
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">⭐</span>
-                    <div>
-                      <div className="text-xs font-bold text-slate-800">4.9/5</div>
-                      <div className="text-xs text-slate-400">50+ avis</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+
+            {/* Right */}
+            <PptMockup />
           </div>
         </div>
       </section>
 
-      {/* STATS */}
-      <section className="py-16 relative overflow-hidden" style={{ background: '#0f172a' }}>
-        <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'radial-gradient(circle, #3b82f6 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-            {stats.map(({ value, label, icon: Icon }) => (
-              <div key={label} className="text-center">
-                <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl mb-3" style={{ background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.2)' }}>
-                  <Icon size={20} style={{ color: '#818cf8' }} />
+      {/* ── STATS ── */}
+      <section className="bg-slate-50 py-12 px-8 border-y border-slate-200">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-7">
+            <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-medium badge-blue">
+              <BarChart3 size={12} /> Nos chiffres clés
+            </div>
+          </div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {stats.map(({ value, suffix, label, icon: Icon }) => (
+              <div key={label} className="bg-white rounded-2xl border border-slate-200 p-5 text-center card-hover">
+                <div className="w-10 h-10 rounded-xl mx-auto mb-3 bg-indigo-50 flex items-center justify-center">
+                  <Icon size={18} className="text-indigo-500" />
                 </div>
-                <div className="font-bold text-4xl text-white mb-1">{value}</div>
-                <div className="text-slate-400 text-sm">{label}</div>
+                <div className="text-3xl font-bold text-slate-900 leading-none">
+                  <AnimatedCounter target={value} suffix={suffix} />
+                </div>
+                <div className="text-xs text-slate-500 mt-1.5">{label}</div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* PROCESS */}
-      <section className="py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold mb-4" style={{ background: 'rgba(99,102,241,0.1)', color: '#6366f1', border: '1px solid rgba(99,102,241,0.2)' }}>
-              <Zap size={13} />Simple & rapide
+      {/* ── PROCESS ── */}
+      <section className="py-20 px-8 bg-white">
+        <div className="max-w-2xl mx-auto">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-medium badge-blue mb-3">
+              <Zap size={12} /> Simple & rapide
             </div>
-            <h2 className="font-bold text-slate-900 mb-4" style={{ fontSize: 'clamp(2rem, 4vw, 3rem)' }}>
-              Comment ça{' '}
-              <span style={{ background: 'linear-gradient(135deg, #6366f1 0%, #06b6d4 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>fonctionne ?</span>
+            <h2 className="text-[clamp(2rem,4vw,3rem)] font-bold text-slate-900 mb-2">
+              Comment ça <span className="gradient-text">fonctionne ?</span>
             </h2>
-            <p className="text-slate-500 max-w-xl mx-auto text-lg">Un processus simple en 3 étapes pour obtenir ta présentation parfaite</p>
+            <p className="text-sm text-slate-500 leading-relaxed">
+              Trois étapes simples, 5 jours, une présentation qui impressionne ton jury.
+            </p>
           </div>
-          <div className="grid md:grid-cols-3 gap-8 mb-12">
-            {processSteps.map(({ step, title, desc, icon: Icon, gradient, accent }, i) => (
-              <div key={step} className="relative">
-                {i < processSteps.length - 1 && (
-                  <div className="hidden md:block absolute top-10 left-[calc(50%+3rem)] w-full h-0.5 z-0" style={{ background: 'linear-gradient(to right, rgba(99,102,241,0.3), transparent)' }} />
-                )}
-                <div
-                  className="rounded-3xl p-8 text-center relative z-10 transition-all duration-300"
-                  style={{ background: 'rgba(255,255,255,0.9)', border: '1px solid #e2e8f0', boxShadow: '0 4px 24px rgba(0,0,0,0.05)' }}
-                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = `0 16px 48px ${accent}20`; e.currentTarget.style.borderColor = `${accent}30` }}
-                  onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 24px rgba(0,0,0,0.05)'; e.currentTarget.style.borderColor = '#e2e8f0' }}
-                >
-                  <div className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: accent }}>{step}</div>
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-5 text-white" style={{ background: gradient }}>
-                    <Icon size={28} />
-                  </div>
-                  <h3 className="font-bold text-xl text-slate-900 mb-3">{title}</h3>
-                  <p className="text-slate-500 text-sm leading-relaxed">{desc}</p>
+
+          <div className="relative">
+            <div className="absolute left-5 top-5 bottom-5 w-px bg-gradient-to-b from-indigo-500 to-cyan-500 opacity-25" />
+            {processSteps.map(({ step, title, desc, dotClass }, i) => (
+              <div key={step} className={`flex gap-5 ${i < processSteps.length - 1 ? 'pb-6' : ''} relative`}>
+                <div className={`shrink-0 w-10 h-10 rounded-full bg-gradient-to-br ${dotClass} flex items-center justify-center text-sm font-semibold text-white z-10 shadow-md hover:scale-110 transition-transform`}>
+                  {i + 1}
+                </div>
+                <div className="process-step-body flex-1 bg-slate-50 rounded-2xl border border-slate-200 p-4">
+                  <div className="text-[10px] font-semibold text-slate-400 tracking-wider uppercase mb-1">Étape {step}</div>
+                  <div className="text-sm font-semibold text-slate-900 mb-1">{title}</div>
+                  <div className="text-xs text-slate-500 leading-relaxed">{desc}</div>
                 </div>
               </div>
             ))}
           </div>
-          <div className="text-center">
-            <Link to="/processus" className="inline-flex items-center gap-2 font-semibold transition-all" style={{ color: '#4f46e5' }}>
-              Voir le processus détaillé <ArrowRight size={16} />
+
+          <div className="mt-8 text-center">
+            <Link to="/processus" className="inline-flex items-center gap-1.5 text-sm font-semibold text-indigo-600 hover:text-indigo-700 transition-colors">
+              Voir le processus détaillé <ArrowRight size={15} />
             </Link>
           </div>
         </div>
       </section>
 
-      {/* PORTFOLIO PREVIEW */}
-      <section className="py-24 relative overflow-hidden" style={{ background: 'linear-gradient(160deg, #f8faff 0%, #eef2ff 50%, #f0fdf4 100%)' }}>
-        <div className="absolute top-0 right-0 w-96 h-96 rounded-full pointer-events-none" style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', opacity: 0.08, filter: 'blur(60px)', transform: 'translate(30%, -30%)' }} />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="flex flex-col sm:flex-row items-center justify-between mb-16 gap-4">
-            <div>
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold mb-3" style={{ background: 'rgba(99,102,241,0.1)', color: '#6366f1', border: '1px solid rgba(99,102,241,0.2)' }}>
-                <Award size={13} />Notre travail
-              </div>
-              <h2 className="font-bold text-slate-900" style={{ fontSize: 'clamp(2rem, 4vw, 3rem)' }}>
-                Réalisations{' '}
-                <span style={{ background: 'linear-gradient(135deg, #6366f1 0%, #06b6d4 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>récentes</span>
-              </h2>
-            </div>
-            <Link
-              to="/portfolio"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all"
-              style={{ background: 'rgba(255,255,255,0.8)', color: '#4f46e5', border: '1.5px solid rgba(99,102,241,0.25)', backdropFilter: 'blur(8px)' }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(99,102,241,0.08)' }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.8)' }}
-            >
-              Voir tout <ArrowRight size={15} />
-            </Link>
+      {/* ── TESTIMONIALS ── */}
+      <section className="pt-16 pb-14 overflow-hidden" style={{ background: 'linear-gradient(160deg, #1a1060 0%, #0f0a2e 100%)' }}>
+        <div className="px-8 mb-7 text-center">
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-medium glass-card-dark text-white/80 mb-2.5">
+            💬 Avis étudiants
           </div>
-          <div className="grid md:grid-cols-3 gap-6">
-            {recentWorks.map(({ title, field, level, gradient, accent, icon }) => (
-              <div
-                key={title}
-                className="rounded-3xl overflow-hidden cursor-pointer group transition-all duration-300"
-                style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.08)' }}
-                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = `0 16px 48px ${accent}25` }}
-                onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 24px rgba(0,0,0,0.08)' }}
-              >
-                <div className="relative aspect-video flex flex-col justify-between p-6" style={{ background: gradient }}>
-                  <div className="absolute inset-0 overflow-hidden">
-                    <div className="absolute top-3 right-3 w-20 h-20 rounded-full border border-white/10" />
-                    <div className="absolute bottom-3 left-3 w-12 h-12 rounded-full border border-white/10" />
-                  </div>
-                  <div className="text-4xl relative z-10" style={{ filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.3))' }}>{icon}</div>
-                  <div className="relative z-10">
-                    <div className="text-white/60 text-xs uppercase tracking-widest mb-1 font-medium">{field}</div>
-                    <div className="text-white font-bold text-sm leading-snug" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.3)' }}>{title}</div>
-                  </div>
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300" style={{ background: 'rgba(0,0,0,0.25)', backdropFilter: 'blur(2px)' }}>
-                    <span className="text-white text-sm font-semibold px-4 py-2 rounded-full" style={{ background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.35)', backdropFilter: 'blur(8px)' }}>Voir le détail →</span>
-                  </div>
-                </div>
-                <div className="bg-white px-4 py-3 flex items-center gap-2 flex-wrap">
-                  <span className="text-xs font-medium px-2.5 py-1 rounded-full" style={{ background: '#f1f5f9', color: '#475569' }}>{field}</span>
-                  <span className="text-xs font-medium px-2.5 py-1 rounded-full" style={{ background: '#f1f5f9', color: '#475569' }}>{level}</span>
-                </div>
-              </div>
-            ))}
-          </div>
+          <h2 className="text-[clamp(2rem,4vw,3rem)] font-bold text-white mb-1">
+            Ce que disent{' '}
+            <span style={{ background: 'linear-gradient(135deg, #a5b4fc, #67e8f9)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+              nos étudiants
+            </span>
+          </h2>
         </div>
+        <TestimonialCarousel />
       </section>
 
-      {/* TESTIMONIALS */}
-      <section className="py-24 relative overflow-hidden" style={{ background: '#0f172a' }}>
-        <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'radial-gradient(circle, #60a5fa 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
-        <div className="absolute top-0 left-1/4 w-80 h-80 rounded-full pointer-events-none" style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', opacity: 0.08, filter: 'blur(60px)' }} />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center mb-14">
-            <h2 className="font-bold text-white mb-4" style={{ fontSize: 'clamp(2rem, 4vw, 3rem)' }}>
-              Ce que disent nos{' '}
-              <span style={{ background: 'linear-gradient(135deg, #a5b4fc, #67e8f9)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>étudiants</span>
-            </h2>
-            <p className="text-slate-400 text-lg">Des résultats concrets, des jurys impressionnés</p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-6">
-            {testimonials.map(({ name, univ, text, rating }) => (
-              <div
-                key={name}
-                className="rounded-3xl p-7 transition-all duration-300"
-                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(8px)' }}
-                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; e.currentTarget.style.borderColor = 'rgba(99,102,241,0.25)'; e.currentTarget.style.transform = 'translateY(-4px)' }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.transform = 'translateY(0)' }}
-              >
-                <div className="flex gap-0.5 mb-4">
-                  {Array.from({ length: rating }).map((_, i) => <Star key={i} size={14} style={{ color: '#fbbf24', fill: '#fbbf24' }} />)}
-                </div>
-                <p className="text-slate-300 text-sm leading-relaxed mb-6 italic">"{text}"</p>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold" style={{ background: 'linear-gradient(135deg, #4f46e5, #0891b2)' }}>
-                    {name.charAt(0)}
-                  </div>
-                  <div>
-                    <div className="text-white text-sm font-semibold">{name}</div>
-                    <div className="text-slate-500 text-xs">{univ}</div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* ── CTA FINAL ── */}
+      <section className="relative overflow-hidden py-24 px-8 text-center"
+        style={{ background: 'linear-gradient(135deg, #312e81 0%, #4f46e5 50%, #0891b2 100%)' }}>
+        <div className="absolute w-96 h-96 rounded-full pointer-events-none blur-3xl opacity-[0.06] -top-24 -left-20"
+          style={{ background: '#fff' }} />
+        <div className="absolute w-80 h-80 rounded-full pointer-events-none blur-3xl opacity-[0.05] -bottom-20 -right-16"
+          style={{ background: '#fff' }} />
 
-      {/* CTA FINAL */}
-      <section className="relative py-24 overflow-hidden" style={{ background: 'linear-gradient(135deg, #312e81 0%, #4f46e5 40%, #0891b2 100%)' }}>
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-0 right-0 w-96 h-96 rounded-full border border-white/5 translate-x-1/3 -translate-y-1/3" />
-          <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full border border-white/5 -translate-x-1/4 translate-y-1/4" />
-          <div className="absolute top-0 left-0 w-80 h-80 rounded-full" style={{ background: 'rgba(255,255,255,0.05)', filter: 'blur(60px)', transform: 'translate(-20%, -30%)' }} />
-          <div className="absolute bottom-0 right-0 w-96 h-96 rounded-full" style={{ background: 'rgba(255,255,255,0.05)', filter: 'blur(80px)', transform: 'translate(20%, 30%)' }} />
-        </div>
-        <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold mb-6" style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', border: '1px solid rgba(255,255,255,0.25)' }}>
-            <Users size={13} />Rejoins 50+ étudiants satisfaits
+        <div className="relative z-10 max-w-lg mx-auto">
+          <div className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-medium glass-card-dark text-white mb-5">
+            <Users size={12} /> Rejoins 50+ étudiants satisfaits
           </div>
-          <h2 className="font-bold text-white mb-6 leading-tight" style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)' }}>Prêt à épater ton jury ?</h2>
-          <p className="text-blue-100 text-lg mb-10 max-w-xl mx-auto">
-            Prends rendez-vous maintenant et reçois ta présentation professionnelle en moins de <strong className="text-white">72 heures</strong>.
+          <h2 className="text-[clamp(2rem,5vw,3.4rem)] font-bold text-white mb-3.5 leading-[1.1]">
+            Prêt à épater ton jury ?
+          </h2>
+          <p className="text-sm text-white/70 mb-8 leading-relaxed">
+            Prends rendez-vous maintenant et reçois ta présentation professionnelle en moins de <strong className="text-white">5 jours</strong>.
           </p>
-          <Link
-            to="/rendez-vous"
-            className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl font-bold text-base transition-all"
-            style={{ background: '#fff', color: '#4f46e5', boxShadow: '0 8px 32px rgba(0,0,0,0.2)' }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 16px 48px rgba(0,0,0,0.25)' }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.2)' }}
+          <Link to="/rendez-vous"
+            className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl font-bold text-sm bg-white text-indigo-600 hover:-translate-y-0.5 hover:shadow-2xl transition-all duration-200"
+            style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.22)' }}
           >
-            <Zap size={16} />Prendre rendez-vous gratuitement<ArrowRight size={16} />
+            <Zap size={16} /> Prendre rendez-vous gratuitement <ArrowRight size={16} />
           </Link>
-          <p className="text-blue-200 text-sm mt-4">Aucun paiement immédiat — on vous contacte d'abord</p>
+          <p className="text-xs text-white/40 mt-3.5">
+            Aucun paiement immédiat — on vous contacte d'abord
+          </p>
         </div>
       </section>
     </div>
