@@ -475,7 +475,7 @@ function ReservationsTab() {
 
   const filtered = filterStatus === 'all' ? reservations : reservations.filter(r => r.status === filterStatus)
 
-  const counts = {
+  const counts: Record<string, number> = {
     all: reservations.length,
     ...Object.fromEntries(Object.keys(STATUS_CONFIG).map(k => [k, reservations.filter(r => r.status === k).length]))
   }
